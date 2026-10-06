@@ -32,7 +32,14 @@ Uradni Wise REST API v2 zahteva API račun. Aplikacija ga ne uporablja; javni JS
 - `server/normalize.js`: normalizacija vrst ter ključi skupin
 - `server/cache.js`: 8-minutni predpomnilnik tednov, 24-urni katalog/podrobnosti in združevanje sočasnih zahtev
 - `public/filter.js`: čista filtrirna funkcija
-- `public/storage.js`: verzionirane nastavitve `localStorage` (`moj-feri-urnik:v1`)
-- `public/app.js`: upravljanje predmetov ter časovni prikaz s samodejnim razporejanjem prekrivanj
+- `public/storage.js`: verzionirane nastavitve `localStorage` (`moj-feri-urnik:v1`, podatkovna shema v2 z migracijo)
+- `public/cache-db.js`: IndexedDB predpomnilnik nefiltriranih tednov
+- `public/api.js`: enotna meja med UI in backend API-jem
+- `public/app.js`: modali, upravljanje predmetov in časovni prikaz s samodejnim razporejanjem prekrivanj
+- `server/scheduler.js`: sinhronizacija ob 08:00 in 16:00 v `Europe/Ljubljana`
 
 Možnosti vrst in skupin se zbirajo iz omejenega okna treh tednov (izbrani datum ter ±28 dni), ne samo iz trenutno odprtega tedna. Podrobnosti dogodkov imajo daljši predpomnilnik in največ štiri zahteve tečejo sočasno, vendar prvi obisk lahko vseeno traja nekaj sekund. Če Wise spremeni HTML, bo treba prilagoditi selektorje. Brez omrežja se uporabi zadnji strežniški predpomnilnik, če obstaja; aplikacija nikoli ne predstavi izmišljenih podatkov kot živih. Ni baze, prijave ali deploya.
+
+Frontend dodatno hrani nefiltrirane tedne v IndexedDB: privzeto 2 tedna nazaj in 3 naprej. Nastavitev je mogoče spremeniti, podatkovni predpomnilnik pa počistiti brez brisanja osebnih filtrov. Backend med delovanjem preverja termina 08:00 in 16:00 po ljubljanskem času; po zagonu izvede zamujeni dnevni termin. Brskalnik ob odprtju najprej pokaže lokalni predpomnilnik, nato preveri svežino. Več zavihkov ne povzroči več backend schedulerjev, ker scheduler teče samo enkrat v procesu strežnika.
+
+Na telefonu je sidebar skrit v modalnem meniju. Urnik privzeto uporablja berljiv vodoravno drsljiv tedenski pogled s fiksno časovno osjo in samodejnim pomikom na današnji dan; gumb »Cel teden« preklopi na vseh pet dni hkrati. Mobilne kartice uporabljajo stabilne kratice iz `server/config.js`, polni podatki pa so vedno dostopni z dotikom dogodka.

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { eventVisible, filterEvents } from '../public/filter.js';
+import { eventVisible, filterEvents, applyRecognized } from '../public/filter.js';
 
 const base = { version: 1, courses: {
   '1': { enabled: true, types: ['PR', 'RV'], groups: ['1:RV:A'] },
@@ -26,4 +26,14 @@ test('prazna izbira skrije skupinske vaje, ne pa skupne izvedbe', () => {
 });
 test('RV-NA DALJAVO se filtrira kot RV', () => {
   assert.equal(eventVisible({...ev('1','RV',['1:RV:A']),rawType:'RV-NA DALJAVO',remote:true},base),true);
+});
+test('priznane vaje so lahko neobvezne brez ponovnega vključevanja filtriranih dogodkov', () => {
+  const settings=structuredClone(base); settings.courses['1'].recognized={enabled:true,types:['RV'],mode:'optional'};
+  const result=applyRecognized([ev('1','RV',['1:RV:A']),ev('1','RV',['1:RV:X']),ev('1','PR')],settings);
+  assert.equal(result.length,2); assert.equal(result[0].optional,true); assert.equal(result[1].optional,false);
+});
+test('skrivanje priznanih vaj ne skrije predavanj', () => {
+  const settings=structuredClone(base); settings.courses['1'].recognized={enabled:true,types:['RV'],mode:'hidden'};
+  const result=applyRecognized([ev('1','RV',['1:RV:A']),ev('1','PR')],settings);
+  assert.deepEqual(result.map(x=>x.type),['PR']);
 });

@@ -1,28 +1,28 @@
 <!doctype html>
 <html lang="sl">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Moj FERI urnik</title><link rel="stylesheet" href="/styles.css"></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Moj FERI urnik</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/settings.css"></head>
 <body>
   <main class="shell">
     <aside class="sidebar">
-      <div class="side-title"><div><h2>Moji predmeti</h2><span id="courseCount" class="muted"></span></div><button id="addToggle" class="icon">＋</button></div>
-      <section id="addPanel" class="add-panel hidden">
-        <label>Dodaj predmet z Wise ID-jem</label>
-        <div class="id-add"><input id="directId" inputmode="numeric" placeholder="npr. 12904"><button id="addId">Dodaj</button></div>
-        <small>ID pred dodajanjem preverimo v dejanskem katalogu.</small>
-      </section>
+      <div class="side-title"><div><h2>Moji predmeti</h2><span id="courseCount" class="muted"></span></div><div class="side-actions"><button id="addToggle" class="icon">＋</button><button id="sidebarClose" class="icon sidebar-close" aria-label="Zapri predmete">×</button></div></div>
       <div id="coursePanels"></div>
+      <div class="mobile-side-actions"><button id="mobileWise">Wise ↗</button><button id="mobileGeneral">Splošne nastavitve</button></div>
       <button id="reset" class="link-button">Ponastavi privzeto izbiro</button>
     </aside>
+    <button id="sidebarBackdrop" class="sidebar-backdrop" aria-label="Zapri predmete"></button>
     <section class="content">
       <div class="toolbar">
         <button id="sidebarToggle" class="sidebar-toggle" aria-label="Odpri predmete">☰</button>
         <div class="week-nav"><button id="prev" aria-label="Prejšnji teden">‹</button><button id="today">Danes</button><button id="next" aria-label="Naslednji teden">›</button><label class="date-control"><span>▣</span><input id="date" type="date"></label></div>
-        <div class="toolbar-end"><div class="view-toggle"><button data-view="week" class="active">Teden</button><button data-view="list">Seznam</button></div><button id="refresh" class="refresh-icon" title="Osveži podatke" aria-label="Osveži podatke">↻</button></div>
+        <div class="toolbar-end"><button id="mobileViewToggle" class="mobile-view-toggle">Cel teden</button><button id="wiseOpen" class="wise-button" title="Odpri izbrane predmete v Wise Timetable">Wise ↗</button><button id="generalSettings" class="refresh-icon" title="Nastavitve" aria-label="Nastavitve">⚙</button><button id="refresh" class="refresh-icon" title="Osveži podatke" aria-label="Osveži podatke">↻</button></div>
       </div>
       <div class="statusline"><strong id="weekLabel"></strong><span id="status" class="muted"></span><span id="published" class="muted"></span></div>
       <div id="notice"></div><div id="schedule"></div>
     </section>
   </main>
   <dialog id="eventDialog"><button class="dialog-close" aria-label="Zapri">×</button><div id="eventDetails"></div></dialog>
+  <dialog id="courseDialog"><form method="dialog"><button class="dialog-close" value="cancel" aria-label="Zapri">×</button><div id="courseSettings"></div><div class="dialog-actions"><button value="cancel">Prekliči</button><button id="saveCourse" value="default" class="primary">Shrani</button></div></form></dialog>
+  <dialog id="addDialog"><form method="dialog"><button class="dialog-close" value="cancel" aria-label="Zapri">×</button><h2>Dodaj predmet</h2><label>Šifra predmeta<input id="directId" autocomplete="off" placeholder="npr. 61V028"></label><p class="muted">Šifro bomo preverili v dejanskem Wise katalogu.</p><div id="addPreview"></div><div id="addError" class="form-error"></div><div class="dialog-actions"><button value="cancel">Prekliči</button><button id="addId" value="default" class="primary">Dodaj</button></div></form></dialog>
+  <dialog id="generalDialog"><form method="dialog"><button class="dialog-close" value="cancel" aria-label="Zapri">×</button><h2>Nastavitve</h2><div class="settings-grid"><label>Tedni naprej<select id="futureWeeks"><option>2</option><option>3</option></select></label><label>Tedni nazaj<select id="pastWeeks"><option>1</option><option>2</option></select></label></div><p id="syncOverview" class="muted"></p><div class="settings-actions"><button id="exportSettings" type="button">Izvozi nastavitve</button><label class="import-button">Uvozi nastavitve<input id="importSettings" type="file" accept="application/json" hidden></label><button id="clearCache" type="button">Počisti predpomnilnik urnika</button></div><div class="dialog-actions"><button value="cancel">Prekliči</button><button id="saveGeneral" value="default" class="primary">Shrani</button></div></form></dialog>
   <script type="module" src="/app.js"></script>
 </body></html>

@@ -1,0 +1,502 @@
+.settings-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.settings-actions button,
+.import-button {
+  display: block;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #122640;
+  color: var(--text);
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.course-panel[data-settings] {
+  cursor: pointer;
+}
+
+.course-panel[data-settings]:hover,
+.course-panel[data-settings]:focus-visible {
+  border-color: rgba(142, 164, 255, 0.38);
+  background: rgba(29, 51, 82, 0.78);
+  outline: none;
+}
+
+.row-chevron {
+  color: var(--muted);
+  font-size: 21px;
+  transition: transform var(--ease), color var(--ease);
+}
+
+.course-panel[data-settings]:hover .row-chevron {
+  color: #fff;
+  transform: translateX(2px);
+}
+
+.recognized .radio {
+  position: relative;
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: rgba(8, 24, 43, 0.48);
+  cursor: pointer;
+  transition: border-color var(--ease), background var(--ease), box-shadow var(--ease);
+}
+
+.recognized .radio:hover {
+  border-color: var(--line-strong);
+  background: rgba(27, 48, 77, 0.72);
+}
+
+.recognized .radio:has(input:checked) {
+  border-color: rgba(114, 140, 255, 0.75);
+  background: rgba(70, 91, 174, 0.22);
+  box-shadow: 0 0 14px rgba(87, 107, 224, 0.12);
+}
+
+.recognized .radio input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #6687ff;
+}
+
+.recognized #recognizedOptions[hidden] {
+  display: none;
+}
+
+/* Compact viewport fit: the full 07:00–21:00 grid remains inside the app. */
+@media (min-width: 761px) {
+  .shell {
+    grid-template-columns: 330px minmax(0, 1fr);
+    gap: 12px;
+    padding: 7px;
+  }
+
+  .sidebar {
+    height: calc(100vh - 14px);
+    padding-top: 13px;
+  }
+
+  .content {
+    padding: 5px 3px;
+  }
+}
+
+.toolbar {
+  height: 40px;
+  margin-bottom: 4px;
+}
+
+.toolbar button,
+.date-control {
+  height: 36px;
+  border-radius: 11px;
+}
+
+.icon,
+.refresh-icon,
+.sidebar-toggle {
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+}
+
+.wise-button {
+  min-width: 64px;
+  padding: 0 11px;
+  font-size: 11px;
+}
+
+.statusline {
+  min-height: 18px;
+  padding-bottom: 3px;
+  font-size: 10px;
+}
+
+.week-day > header {
+  height: 52px;
+  padding: 7px 9px;
+}
+
+.week-day > header > span {
+  top: 8px;
+  right: 6px;
+  padding: 4px 7px;
+}
+
+.time-axis {
+  margin-top: 52px;
+}
+
+.event-slot {
+  padding: 2px;
+}
+
+.event {
+  padding: 5px 6px;
+  border-left-width: 4px;
+  border-radius: 7px;
+}
+
+.event b {
+  font-size: 10px;
+}
+
+.dialog-close {
+  position: sticky;
+  z-index: 4;
+  top: 0;
+  float: right;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(27, 46, 72, 0.92);
+}
+
+.sidebar-close,
+.mobile-side-actions,
+.mobile-view-toggle,
+.mobile-event-head,
+.mobile-room,
+.sidebar-backdrop,
+.event-source {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .shell {
+    height: 100dvh;
+    padding: 0;
+  }
+
+  .content {
+    height: 100dvh;
+    padding: max(6px, env(safe-area-inset-top)) 6px max(5px, env(safe-area-inset-bottom));
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    height: auto;
+  }
+
+  .sidebar-toggle,
+  .refresh-icon,
+  .week-nav > button {
+    min-width: 44px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .week-nav {
+    display: flex;
+    order: initial;
+    width: auto;
+    gap: 4px;
+  }
+
+  .week-nav #today {
+    width: auto;
+    min-width: 52px;
+    padding: 0 8px;
+  }
+
+  .date-control,
+  #wiseOpen,
+  #generalSettings {
+    display: none;
+  }
+
+  .toolbar-end {
+    display: contents;
+  }
+
+  #refresh {
+    margin-left: auto;
+    order: 1;
+  }
+
+  .mobile-view-toggle {
+    display: block;
+    order: 3;
+    width: 100%;
+    height: 32px !important;
+    border-radius: 9px !important;
+    font-size: 11px;
+  }
+
+  .statusline {
+    min-height: 22px;
+    gap: 7px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .statusline #published {
+    display: none;
+  }
+
+  .sidebar {
+    inset: max(7px, env(safe-area-inset-top)) 7px max(7px, env(safe-area-inset-bottom));
+    width: calc(100vw - 14px);
+    height: auto;
+    max-height: none;
+    padding: 13px 8px 10px;
+    z-index: 30;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  body.sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 29;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: rgba(1, 8, 18, 0.66);
+    backdrop-filter: blur(3px);
+  }
+
+  body.sidebar-open .sidebar-backdrop {
+    display: block;
+  }
+
+  .sidebar-close {
+    display: inline-grid;
+    place-items: center;
+  }
+
+  .side-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  #coursePanels {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  #coursePanels::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-side-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+    padding: 8px;
+  }
+
+  .mobile-side-actions button {
+    min-height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--glass);
+    color: var(--text);
+  }
+
+  .week-view.timeline {
+    display: grid;
+    grid-template-columns: 40px repeat(5, minmax(142px, 1fr));
+    overflow: auto;
+    scroll-snap-type: x proximity;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .week-view.timeline::-webkit-scrollbar {
+    display: none;
+  }
+
+  .time-axis {
+    position: sticky;
+    left: 0;
+    z-index: 12;
+    width: 40px;
+    background: linear-gradient(90deg, var(--bg) 84%, transparent);
+    pointer-events: none;
+  }
+
+  .week-day {
+    scroll-snap-align: start;
+    overflow: visible;
+  }
+
+  .week-day > header {
+    position: sticky;
+    top: 0;
+    z-index: 9;
+    height: 48px;
+    padding: 6px 8px;
+    backdrop-filter: blur(8px);
+  }
+
+  .time-axis {
+    margin-top: 48px;
+  }
+
+  .mobile-event-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3px;
+    width: 100%;
+  }
+
+  .mobile-event-head strong {
+    overflow: hidden;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-event-head em {
+    flex: none;
+    padding: 1px 4px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 8px;
+    font-style: normal;
+  }
+
+  .mobile-room {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    color: #becbe0;
+    font-size: 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .event > b,
+  .event-meta,
+  .event > small,
+  .event-open {
+    display: none !important;
+  }
+
+  .event-time {
+    order: -1;
+    font-size: 8px;
+  }
+
+  .event {
+    padding: 4px 5px;
+    touch-action: manipulation;
+  }
+
+  .now-line span {
+    right: 1px;
+    font-size: 8px;
+  }
+
+  dialog {
+    width: calc(100vw - 16px);
+    max-width: none;
+    max-height: calc(100dvh - 16px);
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .event-source {
+    display: inline-block;
+    margin-top: 13px;
+    color: #b6c5ff;
+  }
+
+  .dialog-actions {
+    margin-right: -18px;
+    margin-bottom: -18px;
+    margin-left: -18px;
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  body.mobile-full-week .week-view.timeline {
+    grid-template-columns: 34px repeat(5, minmax(0, 1fr));
+    overflow-x: hidden;
+    scroll-snap-type: none;
+  }
+
+  body.mobile-full-week .time-axis {
+    width: 34px;
+  }
+
+  body.mobile-full-week .week-day > header {
+    padding: 5px 3px;
+    text-align: center;
+  }
+
+  body.mobile-full-week .week-day > header small,
+  body.mobile-full-week .week-day > header > span,
+  body.mobile-full-week .mobile-room,
+  body.mobile-full-week .event-time {
+    display: none;
+  }
+
+  body.mobile-full-week .event {
+    padding: 3px 2px;
+    border-left-width: 3px;
+  }
+
+  body.mobile-full-week .mobile-event-head {
+    display: grid;
+    justify-items: start;
+  }
+
+  body.mobile-full-week .mobile-event-head strong {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 350px) {
+  .week-nav #today {
+    min-width: 46px;
+    font-size: 10px;
+  }
+
+  .sidebar-toggle,
+  .refresh-icon,
+  .week-nav > button {
+    width: 42px;
+    min-width: 42px;
+  }
+}
+
+@media (max-width: 760px) and (orientation: landscape) {
+  .mobile-view-toggle {
+    display: none;
+  }
+
+  .week-view.timeline {
+    grid-template-columns: 38px repeat(5, minmax(128px, 1fr));
+  }
+}
