@@ -29,3 +29,4 @@ temp/
 
 # Per-user local database
 data/
+backups/

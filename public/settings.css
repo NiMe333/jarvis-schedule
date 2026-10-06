@@ -17,7 +17,6 @@
   cursor: pointer;
 }
 
-.view-switch,
 .language-switch {
   display: inline-flex;
   gap: 2px;
@@ -27,7 +26,6 @@
   background: rgba(9, 24, 43, 0.62);
 }
 
-.view-switch button,
 .language-switch button {
   min-height: 34px;
   border: 0;
@@ -38,103 +36,17 @@
   transition: background var(--ease), color var(--ease), box-shadow var(--ease);
 }
 
-.view-switch button.active,
 .language-switch button.active {
   color: #fff;
   background: linear-gradient(135deg, rgba(91, 119, 232, .82), rgba(91, 74, 177, .75));
   box-shadow: inset 0 1px rgba(255,255,255,.14), 0 0 12px rgba(93, 111, 230, .16);
 }
 
-.view-switch button:focus-visible,
 .language-switch button:focus-visible {
   outline: 2px solid #a8b8ff;
   outline-offset: 1px;
 }
 
-.readable-view {
-  min-height: 0;
-  overflow: auto;
-  display: grid;
-  gap: 10px;
-  padding: 2px 3px 18px;
-}
-
-.readable-day {
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  background: rgba(6, 20, 37, .62);
-  overflow: hidden;
-}
-
-.readable-day.is-today {
-  border-color: rgba(139, 119, 224, .5);
-  background: rgba(70, 52, 123, .2);
-}
-
-.readable-day > header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(17, 36, 60, .9);
-  color: #e8eefb;
-  font-size: 13px;
-  text-transform: capitalize;
-}
-
-.readable-day > header small {
-  color: var(--muted);
-  font-size: 10px;
-}
-
-.readable-day > header span {
-  margin-left: auto;
-  padding: 4px 8px;
-  border-radius: 10px;
-  background: #795fc8;
-  font-size: 10px;
-}
-
-.readable-events {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 8px;
-  padding: 8px;
-}
-
-.readable-event {
-  min-height: 98px;
-}
-
-.readable-event .event {
-  min-height: 98px;
-  height: 100%;
-}
-
-.readable-event .event > b,
-.readable-event .event-meta,
-.readable-event .event > small {
-  display: flex !important;
-}
-
-.readable-event .mobile-event-head,
-.readable-event .mobile-room {
-  display: none;
-}
-
-.readable-empty {
-  padding: 10px 12px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.event-source {
-  color: #b6c5ff;
-}
 
 .course-panel[data-settings] {
   cursor: pointer;
@@ -287,11 +199,9 @@
 
 .sidebar-close,
 .mobile-side-actions,
-.mobile-view-toggle,
 .mobile-event-head,
 .mobile-room,
-.sidebar-backdrop,
-.event-source {
+.sidebar-backdrop {
   display: none;
 }
 
@@ -352,15 +262,6 @@
   #refresh {
     margin-left: auto;
     order: 1;
-  }
-
-  .mobile-view-toggle {
-    display: block;
-    order: 3;
-    width: 100%;
-    height: 32px !important;
-    border-radius: 9px !important;
-    font-size: 11px;
   }
 
   .statusline {
@@ -545,12 +446,6 @@
     border-radius: 16px;
   }
 
-  .event-source {
-    display: inline-block;
-    margin-top: 13px;
-    color: #b6c5ff;
-  }
-
   .dialog-actions {
     margin-right: -18px;
     margin-bottom: -18px;
@@ -559,41 +454,6 @@
     padding-left: 18px;
   }
 
-  body.mobile-full-week .week-view.timeline {
-    grid-template-columns: 34px repeat(5, minmax(0, 1fr));
-    overflow-x: hidden;
-    scroll-snap-type: none;
-  }
-
-  body.mobile-full-week .time-axis {
-    width: 34px;
-  }
-
-  body.mobile-full-week .week-day > header {
-    padding: 5px 3px;
-    text-align: center;
-  }
-
-  body.mobile-full-week .week-day > header small,
-  body.mobile-full-week .week-day > header > span,
-  body.mobile-full-week .mobile-room,
-  body.mobile-full-week .event-time {
-    display: none;
-  }
-
-  body.mobile-full-week .event {
-    padding: 3px 2px;
-    border-left-width: 3px;
-  }
-
-  body.mobile-full-week .mobile-event-head {
-    display: grid;
-    justify-items: start;
-  }
-
-  body.mobile-full-week .mobile-event-head strong {
-    font-size: 8px;
-  }
 }
 
 @media (max-width: 350px) {
@@ -607,15 +467,5 @@
   .week-nav > button {
     width: 42px;
     min-width: 42px;
-  }
-}
-
-@media (max-width: 760px) and (orientation: landscape) {
-  .mobile-view-toggle {
-    display: none;
-  }
-
-  .week-view.timeline {
-    grid-template-columns: 38px repeat(5, minmax(128px, 1fr));
   }
 }

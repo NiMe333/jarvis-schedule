@@ -12,3 +12,5 @@ export const registerSync = payload => request('/api/sync/register',{method:'POS
 export const getUserSettings = () => request('/api/settings');
 export const putUserSettings = settings => request('/api/settings',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(settings)});
 export const deleteUserSettings = () => request('/api/settings',{method:'DELETE'});
+export const createRecoveryKey = () => request('/api/settings/recovery-key',{method:'POST'});
+export const recoverSettings = recoveryKey => request('/api/settings/recover',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({recoveryKey})});

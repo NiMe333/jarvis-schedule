@@ -1,0 +1,21 @@
+FROM node:24-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:24-alpine
+WORKDIR /app
+ENV NODE_ENV=production PORT=4173
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY --from=build /app/server ./server
+COPY --from=build /app/public ./public
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/vite.config.js ./vite.config.js
+RUN mkdir -p /app/data && chown -R node:node /app
+USER node
+EXPOSE 4173
+VOLUME ["/app/data"]
+CMD ["node", "server/index.js"]

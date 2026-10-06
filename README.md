@@ -33,6 +33,7 @@ Uradni Wise REST API v2 zahteva API račun. Aplikacija ga ne uporablja; javni JS
 - `server/cache.js`: 8-minutni predpomnilnik tednov, 24-urni katalog/podrobnosti in združevanje sočasnih zahtev
 - `server/settings-store.js`: SQLite shramba osebnih nastavitev, vezana na anonimen UUID cookie
 - `public/filter.js`: čista filtrirna funkcija
+- `public/date-utils.js` in `public/calendar-layout.js`: datumska geometrija in razporejanje prekrivajočih dogodkov
 - `public/storage.js`: verzionirane nastavitve `localStorage` z avtomatsko lokalno varnostno kopijo in obnovo poškodovanega glavnega zapisa
 - `public/cache-db.js`: IndexedDB predpomnilnik nefiltriranih tednov
 - `public/api.js`: enotna meja med UI in backend API-jem
@@ -43,4 +44,30 @@ Možnosti vrst in skupin se zbirajo iz omejenega okna trenutnega tedna in enega 
 
 Frontend dodatno hrani nefiltrirane tedne v IndexedDB za trenutni teden in en teden naprej. Podatkovni predpomnilnik lahko počistimo brez brisanja osebnih filtrov. Backend med delovanjem preverja termina 08:00 in 16:00 po ljubljanskem času; po zagonu izvede zamujeni dnevni termin. Brskalnik ob odprtju najprej pokaže lokalni predpomnilnik, nato preveri svežino. Več zavihkov ne povzroči več backend schedulerjev, ker scheduler teče samo enkrat v procesu strežnika.
 
-Na telefonu je sidebar skrit v modalnem meniju. Urnik uporablja enoten vodoravno drsljiv tedenski pogled s fiksno časovno osjo in začetkom na ponedeljku. Mobilne kartice uporabljajo stabilne kratice iz `server/config.js`, polni podatki pa so vedno dostopni z dotikom dogodka. Backend ob prvem obisku nastavi anonimen naključni cookie `feri_schedule_user` (`HttpOnly`, `SameSite=Lax`, `Secure` v produkciji); cookie vsebuje samo naključni identifikator. Nastavitve se hranijo v `data/user-settings.sqlite`, lokalni `localStorage` in njegova varnostna kopija pa omogočata takojšnje ter offline delovanje. Ob zagonu zmaga novejši zapis glede na `updatedAt`. Brisanje cookieja ustvari novo anonimno identiteto; za prenos med napravami bi bila potrebna prijava ali izvozni ključ.
+Na telefonu je sidebar skrit v modalnem meniju. Urnik uporablja enoten vodoravno drsljiv tedenski pogled s fiksno časovno osjo in začetkom na ponedeljku. Mobilne kartice uporabljajo stabilne kratice iz `server/config.js`, polni podatki pa so vedno dostopni z dotikom dogodka. Backend ob prvem obisku nastavi anonimen naključni cookie `feri_schedule_user` (`HttpOnly`, `SameSite=Lax`, `Secure` v produkciji); cookie vsebuje samo naključni identifikator. Nastavitve se hranijo v `data/user-settings.sqlite`, lokalni `localStorage` in njegova varnostna kopija pa omogočata takojšnje ter offline delovanje. Ob zagonu zmaga novejši zapis glede na `updatedAt`. Brisanje cookieja ustvari novo anonimno identiteto, obstoječo izbiro pa je mogoče povezati z obnovitvenim ključem.
+
+## Obnovitev in upravljanje podatkov
+
+V splošnih nastavitvah lahko uporabnik ustvari obnovitveni ključ, izvozi nastavitve v JSON ali uvozi prejšnji izvoz. Strežnik v SQLite shrani samo SHA-256 hash obnovitvenega ključa; ključ v čisti obliki se pokaže samo ob nastanku. Nov ključ razveljavi prejšnjega. Obnovitev v drugem brskalniku zamenja anonimni UUID cookie in naloži pripadajoče nastavitve. »Ponastavi vse moje nastavitve« izbriše lokalni zapis, lokalno varnostno kopijo in SQLite zapis trenutnega anonimnega uporabnika.
+
+API uporablja omejevanje števila zahtev, največ 30 predmetov, omejitev telesa zahteve 32 kB, strogo preverjanje strukture nastavitev ter varnostne glave CSP, `nosniff`, `DENY`, `no-referrer` in Permissions Policy. V produkciji sta cookie in HSTS vezana na HTTPS.
+
+## Produkcijski zagon in HTTPS
+
+Za obstoječi Jarvis LXC z Nginx in systemd uporabi [deploy/lxc/DEPLOYMENT.md](deploy/lxc/DEPLOYMENT.md). Ta postavitev shrani SQLite v `/var/lib/jarvis-schedule`, namesti storitev `jarvis-schedule` in dnevni backup timer. Docker spodaj je alternativa za samostojen strežnik.
+
+Kopiraj `.env.example` v `.env`, nastavi `DOMAIN` na domeno, katere DNS kaže na strežnik, nato zaženi:
+
+```bash
+docker compose up -d --build
+```
+
+Caddy samodejno pridobi in obnavlja TLS certifikat. SQLite je na trajnem Docker volumnu `schedule-data`, zato ga redeploy aplikacije ne izbriše. Vrati 80 in 443 morata biti javno dosegljivi. Pred javno objavo nastavi redno zunanjo kopiranje backupov in spremljanje prostega prostora.
+
+Za lokalno varnostno kopijo SQLite uporabi:
+
+```bash
+npm run backup
+```
+
+Ukaz naredi konsistentno kopijo z `VACUUM INTO` v imenik `backups/`. V produkcijskem Docker okolju je treba isti postopek izvajati znotraj app kontejnerja ali varnostno kopirati volume z orodjem ponudnika. Backup in `data/` sta izključena iz Gita.

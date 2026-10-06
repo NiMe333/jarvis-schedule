@@ -1,0 +1,10 @@
+[Unit]
+Description=Backup Moj FERI urnik SQLite database
+After=jarvis-schedule.service
+
+[Service]
+Type=oneshot
+User=jarvis-schedule
+Group=jarvis-schedule
+WorkingDirectory=/opt/jarvis-schedule
+ExecStart=/usr/bin/env node scripts/backup-db.mjs /var/lib/jarvis-schedule/user-settings.sqlite /var/backups/jarvis-schedule

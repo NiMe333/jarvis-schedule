@@ -2,6 +2,8 @@ import * as cheerio from 'cheerio';
 import { WISE_ORIGIN, WISE_BASE } from './config.js';
 import { clean, splitTitle, groupKey, isRemote } from './normalize.js';
 
+const layoutError = detail => new Error(`Wise podatkov ni mogoče razbrati (${detail}). Struktura strani se je verjetno spremenila.`);
+
 function allowedDate(date) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('Neveljaven datum.');
   return date;
@@ -32,6 +34,7 @@ export async function fetchCatalog(date) {
     const code = clean(label.find('small').text());
     if (/^\d+$/.test(id) && name) courses.push({ id, name, code });
   });
+  if (!courses.length) throw layoutError('katalog predmetov manjka');
   return { courses, sourceUrl: url };
 }
 
@@ -66,12 +69,15 @@ export async function fetchWeek(date, ids, detailCache) {
   const courseIds = allowedIds(ids);
   const { html, url } = await get('/', { date: validDate, lang: 'sl', match: 'all', c: courseIds.join('_') });
   const $ = cheerio.load(html);
+  if (!$('.day').length) throw layoutError('dnevi urnika manjkajo');
   const nameToId = new Map();
   $('input[name="pick[]"]:checked').each((_, node) => {
     const label = $(node).closest('.picker-item');
     nameToId.set(clean(label.find('span').clone().children().remove().end().text()), String($(node).val()));
   });
+  if (!nameToId.size) throw layoutError('izbrani predmeti niso označeni');
   const events = [];
+  let malformedCards = 0;
   $('.day').each((_, day) => {
     const label = clean($(day).find('.day-date').text());
     const dm = label.match(/(\d+)\.\s*(\d+)\./);
@@ -92,9 +98,11 @@ export async function fetchWeek(date, ids, detailCache) {
       const times = clean($(card).find('.card-time').text()).split(/[–-]/);
       const link = $(card).find('.card-open');
       const eventId = String(link.attr('data-event') || '');
+      if (!/^\d{2}:\d{2}$/.test(times[0]||'') || !/^\d{2}:\d{2}$/.test(times[1]||'') || !eventId) { malformedCards++; return; }
       events.push({ id: eventId, courseId, ...title, date: eventDate, start: times[0], end: times[1], room: parts[0] || '', lecturers: parts[1] || '', groupSummary: parts.slice(2).join(' · '), sourceUrl: new URL((link.attr('href') || '').split('?')[0], WISE_ORIGIN).href });
     });
   });
+  if (malformedCards) throw layoutError(`${malformedCards} dogodkov nima pričakovanih polj`);
   const enriched = [];
   // At most four detail requests at once; repeated event IDs are deduplicated by cache.js.
   for (let i = 0; i < events.length; i += 4) {

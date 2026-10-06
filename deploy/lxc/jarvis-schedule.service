@@ -1,0 +1,27 @@
+[Unit]
+Description=Moj FERI urnik
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=jarvis-schedule
+Group=jarvis-schedule
+WorkingDirectory=/opt/jarvis-schedule
+Environment=NODE_ENV=production
+Environment=PORT=4173
+Environment=DATA_DIR=/var/lib/jarvis-schedule
+Environment=COOKIE_SECURE=false
+ExecStart=/usr/bin/env node server/index.js
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/jarvis-schedule
+CapabilityBoundingSet=
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

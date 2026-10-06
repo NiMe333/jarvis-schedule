@@ -2,6 +2,12 @@ import { deleteUserSettings, getUserSettings, putUserSettings } from './api.js';
 
 export const STORAGE_KEY = 'moj-feri-urnik:v1';
 export const BACKUP_KEY = 'moj-feri-urnik:v1:backup';
+let syncState = 'local';
+const reportSync = state => {
+  syncState = state;
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('settings-sync',{ detail:state }));
+};
+export const getSettingsSyncState = () => syncState;
 export function loadSettings() {
   for (const key of [STORAGE_KEY, BACKUP_KEY]) {
     try {
@@ -23,18 +29,27 @@ function migrate(value) {
   }
   return { version: 2, updatedAt: value.updatedAt || null, language: value.language || 'sl', cache: { futureWeeks: 3, pastWeeks: 2, ...(value.cache || {}) }, courses };
 }
+export function importSettings(value) {
+  if (!value?.courses || typeof value.courses !== 'object' || Array.isArray(value.courses)) throw new Error('Datoteka ne vsebuje veljavnih nastavitev.');
+  const entries=Object.entries(value.courses);
+  if(entries.length>30||entries.some(([id,course])=>!/^\d{1,10}$/.test(id)||!course||typeof course!=='object'||course.types!==null&&!Array.isArray(course.types)||course.groups!==null&&!Array.isArray(course.groups)))throw new Error('Datoteka vsebuje neveljavne nastavitve predmetov.');
+  const imported=migrate(value);
+  saveSettings(imported);
+  return imported;
+}
 export function saveSettings(value) {
   value.version = 2;
   value.updatedAt = new Date().toISOString();
   const serialized = JSON.stringify(value);
   localStorage.setItem(BACKUP_KEY, serialized);
   localStorage.setItem(STORAGE_KEY, serialized);
-  void putUserSettings(value).catch(() => {});
+  reportSync('syncing');
+  void putUserSettings(value).then(() => reportSync('synced')).catch(() => reportSync('offline'));
 }
 export function clearSettings() {
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(BACKUP_KEY);
-  void deleteUserSettings().catch(() => {});
+  void deleteUserSettings().then(() => reportSync('synced')).catch(() => reportSync('offline'));
 }
 
 export async function syncSettings(localValue) {
@@ -51,9 +66,10 @@ export async function syncSettings(localValue) {
       const serialized = JSON.stringify(restored);
       localStorage.setItem(BACKUP_KEY, serialized);
       localStorage.setItem(STORAGE_KEY, serialized);
+      reportSync('synced');
       return restored;
     }
     saveSettings(localValue);
-  } catch {}
+  } catch { reportSync('offline'); }
   return localValue;
 }
