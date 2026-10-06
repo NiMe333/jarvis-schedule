@@ -1,4 +1,5 @@
 export const clean = value => (value || '').replace(/\s+/g, ' ').trim();
+export const isRemote = (rawType = '', room = '') => /NA DALJAVO/i.test(rawType) || /E[- ]?PREDAVALNICA/i.test(room);
 
 export function splitTitle(title) {
   const match = clean(title).match(/^(.*) \(([^)]+)\)$/);
@@ -7,7 +8,7 @@ export function splitTitle(title) {
     subject: match?.[1] || clean(title),
     rawType,
     type: rawType.startsWith('RV') ? 'RV' : rawType,
-    remote: /NA DALJAVO/i.test(rawType)
+    remote: isRemote(rawType)
   };
 }
 

@@ -26,3 +26,6 @@ pnpm-debug.log*
 coverage/
 tmp/
 temp/
+
+# Per-user local database
+data/

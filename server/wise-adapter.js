@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import { WISE_ORIGIN, WISE_BASE } from './config.js';
-import { clean, splitTitle, groupKey } from './normalize.js';
+import { clean, splitTitle, groupKey, isRemote } from './normalize.js';
 
 function allowedDate(date) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('Neveljaven datum.');
@@ -100,7 +100,9 @@ export async function fetchWeek(date, ids, detailCache) {
   for (let i = 0; i < events.length; i += 4) {
     enriched.push(...await Promise.all(events.slice(i, i + 4).map(async event => {
       const detail = await detailCache(event.id, () => fetchDetail(event.id, event.courseId, event));
-      return { ...event, ...detail };
+      const rawType = detail.rawType || event.rawType;
+      const room = detail.room || event.room;
+      return { ...event, ...detail, rawType, room, type: rawType.startsWith('RV') ? 'RV' : rawType, remote: event.remote || isRemote(rawType, room) };
     })));
   }
   const publishedAt = $('p.foot-published time').attr('datetime') || null;

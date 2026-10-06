@@ -4,7 +4,7 @@ Lokalna aplikacija za osebno filtriranje javnega urnika FERI. Nova namestitev ni
 
 ## Zagon na macOS
 
-Potrebuješ Node.js 20 ali novejši.
+Potrebuješ Node.js 22.13 ali novejši (zaradi vgrajenega SQLite modula).
 
 ```bash
 npm install
@@ -22,7 +22,7 @@ Adapter bere javni HTML, ne uradnega Wise REST API-ja in ne uporablja iframe-a.
 
 Na tedenski strani adapter z DOM parserjem Cheerio prebere `.day`, `.day-date`, `article.card`, `.card-title`, `.card-sub`, `.card-time` in `.card-open[data-event]`. Katalog prebere iz obrazca za izbiro predmetov (`input[name="pick[]"]` ter pripadajoča oznaka z imenom in šifro). Datum objave prebere iz `.foot-published time`.
 
-Stran podrobnosti vsebuje `.evfacts` (prostor, predavatelji, vrsta izvedbe in šifra) ter `.evgroup-list` s polnimi izvornimi imeni skupin. Javni HTML ne razkriva stabilnega ID-ja skupine, zato aplikacija uporablja dokumentiran sestavljen ključ `ID-predmeta:normalizirana-vrsta:polno-ime-skupine`. `RV-NA DALJAVO` se normalizira v vrsto `RV`, izvirna oznaka pa ostane na dogodku.
+Stran podrobnosti vsebuje `.evfacts` (prostor, predavatelji, vrsta izvedbe in šifra) ter `.evgroup-list` s polnimi izvornimi imeni skupin. Javni HTML ne razkriva stabilnega ID-ja skupine, zato aplikacija uporablja dokumentiran sestavljen ključ `ID-predmeta:normalizirana-vrsta:polno-ime-skupine`. `RV-NA DALJAVO` se normalizira v vrsto `RV` in `remote: true`. Enako se oddaljena izvedba prepozna, kadar je prostor označen kot `E-PREDAVALNICA`; izvorna vrsta in prostor ostaneta v podatkih dogodka.
 
 Uradni Wise REST API v2 zahteva API račun. Aplikacija ga ne uporablja; javni JSON endpoint za ta pogled ni bil potrjen. Backend dovoljuje samo fiksno domeno in poti FERI, datum oblike ISO ter največ 30 številčnih ID-jev, zato ni splošen proxy.
 
@@ -31,6 +31,7 @@ Uradni Wise REST API v2 zahteva API račun. Aplikacija ga ne uporablja; javni JS
 - `server/wise-adapter.js`: pridobivanje in DOM-parsanje javnega Wise HTML-ja
 - `server/normalize.js`: normalizacija vrst ter ključi skupin
 - `server/cache.js`: 8-minutni predpomnilnik tednov, 24-urni katalog/podrobnosti in združevanje sočasnih zahtev
+- `server/settings-store.js`: SQLite shramba osebnih nastavitev, vezana na anonimen UUID cookie
 - `public/filter.js`: čista filtrirna funkcija
 - `public/storage.js`: verzionirane nastavitve `localStorage` z avtomatsko lokalno varnostno kopijo in obnovo poškodovanega glavnega zapisa
 - `public/cache-db.js`: IndexedDB predpomnilnik nefiltriranih tednov
@@ -38,8 +39,8 @@ Uradni Wise REST API v2 zahteva API račun. Aplikacija ga ne uporablja; javni JS
 - `public/app.js`: modali, upravljanje predmetov in časovni prikaz s samodejnim razporejanjem prekrivanj
 - `server/scheduler.js`: sinhronizacija ob 08:00 in 16:00 v `Europe/Ljubljana`
 
-Možnosti vrst in skupin se zbirajo iz omejenega okna trenutnega tedna in enega tedna naprej, ne samo iz trenutno odprtega tedna. Podrobnosti dogodkov imajo daljši predpomnilnik in največ štiri zahteve tečejo sočasno, vendar prvi obisk lahko vseeno traja nekaj sekund. Če Wise spremeni HTML, bo treba prilagoditi selektorje. Brez omrežja se uporabi zadnji strežniški predpomnilnik, če obstaja; aplikacija nikoli ne predstavi izmišljenih podatkov kot živih. Ni baze, prijave ali deploya.
+Možnosti vrst in skupin se zbirajo iz omejenega okna trenutnega tedna in enega tedna naprej, ne samo iz trenutno odprtega tedna. Podrobnosti dogodkov imajo daljši predpomnilnik in največ štiri zahteve tečejo sočasno, vendar prvi obisk lahko vseeno traja nekaj sekund. Če Wise spremeni HTML, bo treba prilagoditi selektorje. Brez omrežja se uporabi zadnji strežniški predpomnilnik, če obstaja; aplikacija nikoli ne predstavi izmišljenih podatkov kot živih.
 
 Frontend dodatno hrani nefiltrirane tedne v IndexedDB za trenutni teden in en teden naprej. Podatkovni predpomnilnik lahko počistimo brez brisanja osebnih filtrov. Backend med delovanjem preverja termina 08:00 in 16:00 po ljubljanskem času; po zagonu izvede zamujeni dnevni termin. Brskalnik ob odprtju najprej pokaže lokalni predpomnilnik, nato preveri svežino. Več zavihkov ne povzroči več backend schedulerjev, ker scheduler teče samo enkrat v procesu strežnika.
 
-Na telefonu je sidebar skrit v modalnem meniju. Urnik uporablja enoten vodoravno drsljiv tedenski pogled s fiksno časovno osjo in samodejnim pomikom na današnji dan. Mobilne kartice uporabljajo stabilne kratice iz `server/config.js`, polni podatki pa so vedno dostopni z dotikom dogodka. Backend ob prvem obisku nastavi anonimen naključni cookie `feri_schedule_user` (`HttpOnly`, `SameSite=Lax`, `Secure` v produkciji); cookie ne vsebuje urnika ali dovoljenj. Osebne nastavitve ostanejo v lokalnem storage adapterju, zato lahko kasnejša strežniška baza zamenja adapter brez spremembe UI.
+Na telefonu je sidebar skrit v modalnem meniju. Urnik uporablja enoten vodoravno drsljiv tedenski pogled s fiksno časovno osjo in začetkom na ponedeljku. Mobilne kartice uporabljajo stabilne kratice iz `server/config.js`, polni podatki pa so vedno dostopni z dotikom dogodka. Backend ob prvem obisku nastavi anonimen naključni cookie `feri_schedule_user` (`HttpOnly`, `SameSite=Lax`, `Secure` v produkciji); cookie vsebuje samo naključni identifikator. Nastavitve se hranijo v `data/user-settings.sqlite`, lokalni `localStorage` in njegova varnostna kopija pa omogočata takojšnje ter offline delovanje. Ob zagonu zmaga novejši zapis glede na `updatedAt`. Brisanje cookieja ustvari novo anonimno identiteto; za prenos med napravami bi bila potrebna prijava ali izvozni ključ.

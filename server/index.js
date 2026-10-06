@@ -7,6 +7,7 @@ import { cached, stale } from './cache.js';
 import { fetchCatalog, fetchWeek } from './wise-adapter.js';
 import { CACHE_MS, COURSE_ABBREVIATIONS, DEFAULT_COURSES, FETCH_WEEKS_AHEAD, FETCH_WEEKS_BEHIND, PORT, PROFILE } from './config.js';
 import { registerTarget, schedulerStatus, startScheduler } from './scheduler.js';
+import { deleteUserSettings, readUserSettings, writeUserSettings } from './settings-store.js';
 
 const app = express();
 const httpServer = createHttpServer(app);
@@ -14,9 +15,11 @@ const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..
 const detail = (id, loader) => cached(`detail:${id}`, loader, 24 * 60 * 60 * 1000).then(x => x.value);
 app.use(express.json({ limit: '32kb' }));
 app.use((req, res, next) => {
-  if (!/(^|;)\s*feri_schedule_user=/.test(req.headers.cookie || '')) {
+  const existing = (req.headers.cookie || '').match(/(?:^|;)\s*feri_schedule_user=([0-9a-f-]{36})(?:;|$)/i)?.[1];
+  req.userId = existing || randomUUID();
+  if (!existing) {
     const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-    res.setHeader('Set-Cookie', `feri_schedule_user=${randomUUID()}; HttpOnly; SameSite=Lax; Max-Age=31536000${secure}; Path=/`);
+    res.setHeader('Set-Cookie', `feri_schedule_user=${req.userId}; HttpOnly; SameSite=Lax; Max-Age=31536000${secure}; Path=/`);
   }
   next();
 });
@@ -26,6 +29,15 @@ function sendError(res, error, staleEntry) {
 }
 
 app.get('/api/config', (_, res) => res.json({ profile: PROFILE, defaultCourses: DEFAULT_COURSES, abbreviations: COURSE_ABBREVIATIONS, cacheMs: CACHE_MS, fetchWeeksAhead: FETCH_WEEKS_AHEAD, fetchWeeksBehind: FETCH_WEEKS_BEHIND }));
+app.get('/api/settings', (req, res) => res.json({ settings: readUserSettings(req.userId) }));
+app.put('/api/settings', (req, res) => {
+  const value = req.body;
+  const courses = value?.courses;
+  if (!value || typeof value !== 'object' || !courses || typeof courses !== 'object' || Array.isArray(courses) || Object.keys(courses).length > 50) return res.status(400).json({ error: 'Neveljavne nastavitve.' });
+  writeUserSettings(req.userId, value);
+  res.json({ ok: true });
+});
+app.delete('/api/settings', (req, res) => { deleteUserSettings(req.userId); res.json({ ok: true }); });
 app.get('/api/sync/status', (_,res)=>res.json(schedulerStatus()));
 app.post('/api/sync/register',(req,res)=>{
   const ids=Array.isArray(req.body?.ids)?req.body.ids.map(String):[];

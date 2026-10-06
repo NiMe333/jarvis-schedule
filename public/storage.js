@@ -1,3 +1,5 @@
+import { deleteUserSettings, getUserSettings, putUserSettings } from './api.js';
+
 export const STORAGE_KEY = 'moj-feri-urnik:v1';
 export const BACKUP_KEY = 'moj-feri-urnik:v1:backup';
 export function loadSettings() {
@@ -19,7 +21,7 @@ function migrate(value) {
     course.enabled ??= true; course.types ??= null; course.groups ??= null;
     course.recognized ??= { enabled: false, types: [], mode: 'optional' };
   }
-  return { version: 2, language: value.language || 'sl', cache: { futureWeeks: 3, pastWeeks: 2, ...(value.cache || {}) }, courses };
+  return { version: 2, updatedAt: value.updatedAt || null, language: value.language || 'sl', cache: { futureWeeks: 3, pastWeeks: 2, ...(value.cache || {}) }, courses };
 }
 export function saveSettings(value) {
   value.version = 2;
@@ -27,8 +29,31 @@ export function saveSettings(value) {
   const serialized = JSON.stringify(value);
   localStorage.setItem(BACKUP_KEY, serialized);
   localStorage.setItem(STORAGE_KEY, serialized);
+  void putUserSettings(value).catch(() => {});
 }
 export function clearSettings() {
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(BACKUP_KEY);
+  void deleteUserSettings().catch(() => {});
+}
+
+export async function syncSettings(localValue) {
+  try {
+    const remote = (await getUserSettings()).settings;
+    if (!remote?.courses) {
+      saveSettings(localValue);
+      return localValue;
+    }
+    const localTime = Date.parse(localValue.updatedAt || 0) || 0;
+    const remoteTime = Date.parse(remote.updatedAt || 0) || 0;
+    if (remoteTime > localTime) {
+      const restored = migrate(remote);
+      const serialized = JSON.stringify(restored);
+      localStorage.setItem(BACKUP_KEY, serialized);
+      localStorage.setItem(STORAGE_KEY, serialized);
+      return restored;
+    }
+    saveSettings(localValue);
+  } catch {}
+  return localValue;
 }

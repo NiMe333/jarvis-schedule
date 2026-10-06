@@ -1,9 +1,3 @@
- .event-source {
-  display: inline-block;
-  margin-top: 14px;
-  color: #b6c5ff;
-}
-
  .refresh-status {
   display: inline-block;
   min-width: 92px;
@@ -108,6 +102,39 @@
 .time-axis span.time-axis-start { transform: none; }
 .refresh-icon.is-loading { animation: none !important; }
 .now-line { pointer-events: none; }
+
+.event { container-type: inline-size; }
+
+.event-badges {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  min-width: 0;
+}
+
+.remote-badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 5px;
+  border: 1px solid rgba(142, 164, 255, .38);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(68, 119, 188, .35), rgba(111, 79, 178, .28));
+  color: #dce6ff;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .08);
+}
+
+@container (max-width: 125px) {
+  .remote-badge { padding-inline: 4px; }
+  .remote-label { display: none; }
+}
 
 @media (max-width: 760px) {
   .week-view.timeline { --day-header-height: 68px; }
