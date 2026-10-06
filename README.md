@@ -82,21 +82,22 @@ curl -fsS http://127.0.0.1:4173/api/health
 
 ### Dostop prek Tailscale MagicDNS
 
-Container je prijavljen v isti Tailscale tailnet kot `jarvis-dashboard` in ima ime `feri-schedule`. Ker ACL dovoljuje `tcp:80`, je aplikacija objavljena prek Tailscale Serve:
+Container je prijavljen v isti Tailscale tailnet kot `jarvis-dashboard` in ima ime `feri-schedule`. Nginx na portu 80 streže zgrajeni `dist`, Tailscale Serve pa HTTPS promet na 443 posreduje v Nginx:
 
 ```text
+https://feri-schedule.taile46e9c.ts.net/
 http://feri-schedule/
-http://feri-schedule.taile46e9c.ts.net/
+http://100.115.171.25/
 ```
 
-Naslova delujeta samo na napravah v istem tailnetu. Tailscale šifrira povezavo, javni internetni porti pa niso odprti. Konfiguracijo preveriš z:
+Naslovi delujejo samo na napravah v istem tailnetu. Tailscale šifrira HTTPS povezavo, javni internetni porti pa niso odprti. Za HTTPS mora Tailscale ACL dovoliti `tcp:443` od tvojih naprav do `feri-schedule`; za neposredni HTTP dostop se uporablja `tcp:80`. Konfiguracijo preveriš z:
 
 ```bash
 tailscale status
 tailscale serve status
 ```
 
-Če ACL pozneje dovoli `tcp:443`, lahko Serve preklopiš na HTTPS:
+Konfiguracija Serve za HTTPS:
 
 ```bash
 tailscale serve reset

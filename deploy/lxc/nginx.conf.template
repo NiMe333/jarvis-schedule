@@ -1,11 +1,14 @@
 server {
     listen 80;
     listen [::]:80;
-    server_name __SERVER_NAME__;
+    server_name __SERVER_NAME__ 127.0.0.1 192.168.0.31 100.115.171.25 feri-schedule.taile46e9c.ts.net;
+
+    root /opt/jarvis-schedule/dist;
+    index index.html;
 
     client_max_body_size 32k;
 
-    location / {
+    location /api/ {
         proxy_pass http://127.0.0.1:4173;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
@@ -14,5 +17,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
     }
 }
