@@ -10,7 +10,7 @@ Na Proxmox gostitelju:
 ssh -t jarvis 'sudo /usr/sbin/pct list'
 ```
 
-V nadaljevanju zamenjaj `<CTID>` z ID-jem LXC-ja na naslovu `192.168.0.30`.
+V nadaljevanju zamenjaj `<CTID>` z ID-jem LXC-ja na naslovu `192.168.0.31`.
 
 ## 2. Prenesi projekt
 
@@ -36,10 +36,10 @@ Installer preveri Node.js 22.13+, zgradi frontend, ustvari uporabnika `jarvis-sc
 
 ## 3. Lokalni DNS
 
-Ime `urnik.jarvis` mora kazati na `192.168.0.30`. Dodaj ga v lokalni DNS ali začasno v `/etc/hosts`:
+Ime `urnik.jarvis` mora kazati na `192.168.0.31`. Dodaj ga v lokalni DNS ali začasno v `/etc/hosts`:
 
 ```text
-192.168.0.30 urnik.jarvis
+192.168.0.31 urnik.jarvis
 ```
 
 Nato odpri `http://urnik.jarvis` oziroma `http://192.168.0.31`.

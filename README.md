@@ -56,6 +56,70 @@ API uporablja omejevanje števila zahtev, največ 30 predmetov, omejitev telesa 
 
 Za obstoječi Jarvis LXC z Nginx in systemd uporabi [deploy/lxc/DEPLOYMENT.md](deploy/lxc/DEPLOYMENT.md). Ta postavitev shrani SQLite v `/var/lib/jarvis-schedule`, namesti storitev `jarvis-schedule` in dnevni backup timer. Docker spodaj je alternativa za samostojen strežnik.
 
+### Trenutna postavitev na Jarvisu
+
+Produkcijski scheduler teče v namenskem Debian 13 LXC containerju:
+
+```text
+Container: feri-schedule (CT 102)
+LAN naslov: 192.168.0.31
+Aplikacija: /opt/jarvis-schedule
+SQLite: /var/lib/jarvis-schedule/user-settings.sqlite
+Backupi: /var/backups/jarvis-schedule/
+Proces: systemd/jarvis-schedule.service
+Lokalni proxy: Nginx → 127.0.0.1:4173
+```
+
+Storitev teče kot uporabnik `jarvis-schedule`, scheduler pa osvežuje podatke ob 08:00 in 16:00 po ljubljanskem času. Backup timer vsak dan naredi kopijo SQLite baze. Stanje preveriš z:
+
+```bash
+ssh root@192.168.0.31
+systemctl status jarvis-schedule --no-pager
+systemctl status jarvis-schedule-backup.timer --no-pager
+journalctl -u jarvis-schedule -n 100 --no-pager
+curl -fsS http://127.0.0.1:4173/api/health
+```
+
+### Dostop prek Tailscale MagicDNS
+
+Container je prijavljen v isti Tailscale tailnet kot `jarvis-dashboard` in ima ime `feri-schedule`. Ker ACL dovoljuje `tcp:80`, je aplikacija objavljena prek Tailscale Serve:
+
+```text
+http://feri-schedule/
+http://feri-schedule.taile46e9c.ts.net/
+```
+
+Naslova delujeta samo na napravah v istem tailnetu. Tailscale šifrira povezavo, javni internetni porti pa niso odprti. Konfiguracijo preveriš z:
+
+```bash
+tailscale status
+tailscale serve status
+```
+
+Če ACL pozneje dovoli `tcp:443`, lahko Serve preklopiš na HTTPS:
+
+```bash
+tailscale serve reset
+tailscale serve --bg --yes --https=443 http://127.0.0.1:4173
+```
+
+Pri trenutnem lokalnem HTTP dostopu je v systemd enoti `COOKIE_SECURE=false`. Pri javnem HTTPS reverse proxyju mora biti `COOKIE_SECURE=true`.
+
+### Posodobitev na strežniku
+
+Iz korena projekta na Macu prenesi samo kodo; imenikov z uporabniškimi podatki ne prepisuj:
+
+```bash
+rsync -av --exclude '.git/' --exclude 'node_modules/' --exclude 'dist/' \
+  --exclude 'data/' --exclude 'backups/' \
+  ./ root@192.168.0.31:/opt/jarvis-schedule/
+
+ssh root@192.168.0.31 \
+  'bash /opt/jarvis-schedule/deploy/lxc/update.sh /opt/jarvis-schedule'
+```
+
+`update.sh` ponovno zgradi frontend in zažene systemd storitev, ne izbriše `/var/lib/jarvis-schedule` ali `/var/backups/jarvis-schedule`.
+
 Kopiraj `.env.example` v `.env`, nastavi `DOMAIN` na domeno, katere DNS kaže na strežnik, nato zaženi:
 
 ```bash
