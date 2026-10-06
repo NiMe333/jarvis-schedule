@@ -34,6 +34,7 @@ test('priznane vaje so lahko neobvezne brez ponovnega vključevanja filtriranih 
 });
 test('skrivanje priznanih vaj ne skrije predavanj', () => {
   const settings=structuredClone(base); settings.courses['1'].recognized={enabled:true,types:['RV'],mode:'hidden'};
-  const result=applyRecognized([ev('1','RV',['1:RV:A']),ev('1','PR')],settings);
+  settings.courses['1'].types=['PR','RV','SV'];
+  const result=applyRecognized([ev('1','RV',['1:RV:A']),ev('1','SV'),ev('1','PR')],settings);
   assert.deepEqual(result.map(x=>x.type),['PR']);
 });

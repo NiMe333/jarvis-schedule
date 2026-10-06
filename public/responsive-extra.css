@@ -169,8 +169,49 @@
   }
 
   .days-grid {
-    grid-template-columns: repeat(5, clamp(138px, 40vw, 155px));
+    grid-template-columns: repeat(5, clamp(84px, calc((100vw - clamp(44px, 13vw, 56px) - 20px) / 3), 120px));
     width: max-content;
     min-width: max-content;
   }
+
+  .sidebar-toggle,
+  .refresh-icon,
+  .week-nav > button {
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    border-radius: 14px;
+  }
+
+  .week-nav #today {
+    flex-basis: auto;
+    width: auto;
+  }
+
+  .state {
+    width: 100%;
+    min-width: 0;
+    margin: 8px 0;
+    padding: 30px 14px;
+    overflow-wrap: anywhere;
+  }
+
+  .week-day > header > span {
+    max-width: calc(100% - 8px);
+    padding: 3px 5px;
+    font-size: 8px;
+    white-space: nowrap;
+  }
+}
+
+#reset.link-button {
+  width: fit-content;
+  max-width: calc(100% - 16px);
+  margin: auto 8px 0;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--glass);
+  text-align: center;
 }

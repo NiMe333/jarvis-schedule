@@ -12,7 +12,7 @@ export function filterEvents(events, settings) { return events.filter(event => e
 export function applyRecognized(events, settings) {
   return filterEvents(events, settings).flatMap(event => {
     const recognized = settings.courses[event.courseId]?.recognized;
-    const applies = recognized?.enabled && event.type !== 'PR' && recognized.types.includes(event.type);
+    const applies = recognized?.enabled && event.type !== 'PR';
     if (applies && recognized.mode === 'hidden') return [];
     return [{ ...event, optional: Boolean(applies) }];
   });
