@@ -1,10 +1,11 @@
 import express from 'express';
+import { randomUUID } from 'node:crypto';
 import { createServer as createHttpServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { cached, stale } from './cache.js';
 import { fetchCatalog, fetchWeek } from './wise-adapter.js';
-import { CACHE_MS, COURSE_ABBREVIATIONS, DEFAULT_COURSES, PORT, PROFILE } from './config.js';
+import { CACHE_MS, COURSE_ABBREVIATIONS, DEFAULT_COURSES, FETCH_WEEKS_AHEAD, FETCH_WEEKS_BEHIND, PORT, PROFILE } from './config.js';
 import { registerTarget, schedulerStatus, startScheduler } from './scheduler.js';
 
 const app = express();
@@ -12,12 +13,19 @@ const httpServer = createHttpServer(app);
 const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../public');
 const detail = (id, loader) => cached(`detail:${id}`, loader, 24 * 60 * 60 * 1000).then(x => x.value);
 app.use(express.json({ limit: '32kb' }));
+app.use((req, res, next) => {
+  if (!/(^|;)\s*feri_schedule_user=/.test(req.headers.cookie || '')) {
+    const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+    res.setHeader('Set-Cookie', `feri_schedule_user=${randomUUID()}; HttpOnly; SameSite=Lax; Max-Age=31536000${secure}; Path=/`);
+  }
+  next();
+});
 
 function sendError(res, error, staleEntry) {
   res.status(staleEntry ? 200 : 502).json({ error: error.message, stale: Boolean(staleEntry), ...(staleEntry?.value || {}), fetchedAt: staleEntry?.at || null });
 }
 
-app.get('/api/config', (_, res) => res.json({ profile: PROFILE, defaultCourses: DEFAULT_COURSES, abbreviations: COURSE_ABBREVIATIONS, cacheMs: CACHE_MS }));
+app.get('/api/config', (_, res) => res.json({ profile: PROFILE, defaultCourses: DEFAULT_COURSES, abbreviations: COURSE_ABBREVIATIONS, cacheMs: CACHE_MS, fetchWeeksAhead: FETCH_WEEKS_AHEAD, fetchWeeksBehind: FETCH_WEEKS_BEHIND }));
 app.get('/api/sync/status', (_,res)=>res.json(schedulerStatus()));
 app.post('/api/sync/register',(req,res)=>{
   const ids=Array.isArray(req.body?.ids)?req.body.ids.map(String):[];
@@ -43,7 +51,7 @@ app.get('/api/options', async (req, res) => {
   const ids = String(req.query.ids || '');
   const d = new Date(`${date}T12:00:00Z`);
   if (Number.isNaN(d.valueOf())) return res.status(400).json({ error: 'Neveljaven datum.' });
-  const dates = [-28, 0, 28].map(days => { const x = new Date(d); x.setUTCDate(x.getUTCDate() + days); return x.toISOString().slice(0, 10); });
+  const dates = [0, 7].map(days => { const x = new Date(d); x.setUTCDate(x.getUTCDate() + days); return x.toISOString().slice(0, 10); });
   const key = `options:${date}:${ids.split(',').sort().join(',')}`;
   try {
     const entry = await cached(key, async () => {
@@ -69,10 +77,11 @@ if (process.env.NODE_ENV === 'development') {
   app.use((_, res) => res.sendFile(path.join(publicDir, 'index.html')));
 }
 const today = new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Ljubljana'}).format(new Date());
+const nextWeek = (() => { const date = new Date(`${today}T12:00:00Z`); date.setUTCDate(date.getUTCDate() + 7); return date.toISOString().slice(0, 10); })();
 startScheduler(async target => {
   for (const date of target.dates) {
     const key=`week:${date}:${target.ids.slice().sort().join(',')}`;
     await cached(key,()=>fetchWeek(date,target.ids.join(','),detail),CACHE_MS,true);
   }
-}, { ids:DEFAULT_COURSES, dates:[today] });
+}, { ids:DEFAULT_COURSES, dates:[today,nextWeek] });
 httpServer.listen(PORT, () => console.log(`Moj FERI urnik: http://localhost:${PORT}`));

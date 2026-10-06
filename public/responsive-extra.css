@@ -1,0 +1,176 @@
+ .event-source {
+  display: inline-block;
+  margin-top: 14px;
+  color: #b6c5ff;
+}
+
+ .refresh-status {
+  display: inline-block;
+  min-width: 92px;
+  color: var(--muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.settings-actions small {
+  display: block;
+  margin: -3px 2px 5px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.spinner {
+  animation: none !important;
+}
+
+@media (max-width: 760px) {
+  #viewSwitch {
+    order: 3;
+    width: 100%;
+    min-height: 34px;
+  }
+
+  .refresh-status {
+    position: absolute;
+    top: 50px;
+    right: 7px;
+    min-width: 0;
+  }
+
+  #viewSwitch button {
+    flex: 1;
+    min-height: 34px;
+  }
+
+  .readable-view {
+    overflow: auto;
+    min-height: 0;
+  }
+
+  .readable-events {
+    grid-template-columns: 1fr;
+  }
+
+  .readable-event .event {
+    min-height: 106px;
+  }
+}
+
+@media (max-width: 760px) and (orientation: landscape) {
+  #viewSwitch {
+    order: initial;
+    width: auto;
+  }
+}
+
+/* Calendar geometry: the day header is a separate fixed row above the grid. */
+.week-view.timeline {
+  --day-header-height: 60px;
+  --hour-height: 44px;
+}
+.week-day > header {
+  height: var(--day-header-height);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-content: center;
+  position: relative;
+}
+.week-day > header > b,
+.week-day > header > small { grid-column: 1; }
+.week-day > header > span {
+  position: absolute;
+  right: auto;
+  top: auto;
+  bottom: 4px;
+  margin: 0;
+  transform: none;
+}
+.today-badge--start { left: 8px; }
+.today-badge--center { left: 50%; transform: translateX(-50%); }
+.today-badge--end { right: 8px; }
+.time-axis {
+  margin-top: var(--day-header-height);
+  height: calc(100% - var(--day-header-height));
+}
+.time-axis span { transform: translateY(-50%); }
+.time-axis span.time-axis-start { transform: none; }
+.refresh-icon.is-loading { animation: none !important; }
+.now-line { pointer-events: none; }
+
+@media (max-width: 760px) {
+  .week-view.timeline { --day-header-height: 52px; }
+  .week-day > header { height: var(--day-header-height); }
+  .time-axis { margin-top: var(--day-header-height); }
+}
+
+/* The time gutter owns real layout space; only the day viewport scrolls sideways. */
+.week-view.timeline {
+  display: block;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.schedule-shell {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: start;
+  width: 100%;
+  min-width: 0;
+}
+
+.time-gutter {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: 52px;
+  margin-top: var(--day-header-height);
+  background: var(--bg);
+  pointer-events: none;
+}
+
+.days-viewport {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: clip;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.days-viewport::-webkit-scrollbar { display: none; }
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  gap: 4px;
+  width: 100%;
+  min-width: 650px;
+}
+
+.days-grid .week-day {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.week-day > header > span.today-badge--start { left: 8px; right: auto; }
+.week-day > header > span.today-badge--center { left: 50%; right: auto; }
+.week-day > header > span.today-badge--end { left: auto; right: 8px; }
+
+@media (max-width: 760px) {
+  .schedule-shell {
+    grid-template-columns: clamp(44px, 13vw, 56px) minmax(0, 1fr);
+  }
+
+  .time-gutter {
+    width: clamp(44px, 13vw, 56px);
+  }
+
+  .days-grid {
+    grid-template-columns: repeat(5, clamp(138px, 40vw, 155px));
+    width: max-content;
+    min-width: max-content;
+  }
+}

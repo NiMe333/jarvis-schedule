@@ -17,6 +17,125 @@
   cursor: pointer;
 }
 
+.view-switch,
+.language-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: 11px;
+  background: rgba(9, 24, 43, 0.62);
+}
+
+.view-switch button,
+.language-switch button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 11px;
+  background: transparent;
+  color: var(--muted);
+  transition: background var(--ease), color var(--ease), box-shadow var(--ease);
+}
+
+.view-switch button.active,
+.language-switch button.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(91, 119, 232, .82), rgba(91, 74, 177, .75));
+  box-shadow: inset 0 1px rgba(255,255,255,.14), 0 0 12px rgba(93, 111, 230, .16);
+}
+
+.view-switch button:focus-visible,
+.language-switch button:focus-visible {
+  outline: 2px solid #a8b8ff;
+  outline-offset: 1px;
+}
+
+.readable-view {
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+  padding: 2px 3px 18px;
+}
+
+.readable-day {
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: rgba(6, 20, 37, .62);
+  overflow: hidden;
+}
+
+.readable-day.is-today {
+  border-color: rgba(139, 119, 224, .5);
+  background: rgba(70, 52, 123, .2);
+}
+
+.readable-day > header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(17, 36, 60, .9);
+  color: #e8eefb;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.readable-day > header small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.readable-day > header span {
+  margin-left: auto;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: #795fc8;
+  font-size: 10px;
+}
+
+.readable-events {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 8px;
+  padding: 8px;
+}
+
+.readable-event {
+  min-height: 98px;
+}
+
+.readable-event .event {
+  min-height: 98px;
+  height: 100%;
+}
+
+.readable-event .event > b,
+.readable-event .event-meta,
+.readable-event .event > small {
+  display: flex !important;
+}
+
+.readable-event .mobile-event-head,
+.readable-event .mobile-room {
+  display: none;
+}
+
+.readable-empty {
+  padding: 10px 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.event-source {
+  color: #b6c5ff;
+}
+
 .course-panel[data-settings] {
   cursor: pointer;
 }

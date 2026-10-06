@@ -12,6 +12,6 @@ function migrate(value, defaultIds=[]) {
     course.enabled ??= true; course.types ??= null; course.groups ??= null;
     course.recognized ??= { enabled: false, types: [], mode: 'optional' };
   }
-  return { version: 2, cache: { futureWeeks: 3, pastWeeks: 2, ...(value.cache || {}) }, courses };
+  return { version: 2, language: value.language || 'sl', cache: { futureWeeks: 3, pastWeeks: 2, ...(value.cache || {}) }, courses };
 }
 export function saveSettings(value) { value.version = 2; localStorage.setItem(STORAGE_KEY, JSON.stringify(value)); }

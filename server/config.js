@@ -8,3 +8,5 @@ export const COURSE_ABBREVIATIONS = {
   '12889': 'ATURP', '12904': 'DF', '12965': 'NRS',
   '13007': 'PPR', '13038': 'RGA', '13042': 'RM'
 };
+export const FETCH_WEEKS_AHEAD = 1;
+export const FETCH_WEEKS_BEHIND = 0;
