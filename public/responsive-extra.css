@@ -20,6 +20,16 @@
   line-height: 1.4;
 }
 
+.settings-backup-note {
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(41, 67, 96, .22);
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
 .spinner {
   animation: none !important;
 }
@@ -100,8 +110,13 @@
 .now-line { pointer-events: none; }
 
 @media (max-width: 760px) {
-  .week-view.timeline { --day-header-height: 52px; }
-  .week-day > header { height: var(--day-header-height); }
+  .week-view.timeline { --day-header-height: 68px; }
+  .week-day > header {
+    height: var(--day-header-height);
+    align-content: start;
+    padding-top: 7px;
+    padding-bottom: 25px;
+  }
   .time-axis { margin-top: var(--day-header-height); }
 }
 
@@ -214,4 +229,13 @@
   border-radius: 9px;
   background: var(--glass);
   text-align: center;
+}
+
+#coursePanels {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(130, 153, 190, .35) transparent;
 }

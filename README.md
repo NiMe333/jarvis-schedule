@@ -1,6 +1,6 @@
 # Moj FERI urnik
 
-Lokalna demo aplikacija za osebno filtriranje javnega urnika FERI. Vsak predmet ima lastno izbiro vrst izvedbe in skupin; nastavitve ostanejo v brskalniku. Predmet se doda z njegovim preverjenim številčnim Wise ID-jem.
+Lokalna aplikacija za osebno filtriranje javnega urnika FERI. Nova namestitev nima vnaprej izbranih predmetov; uporabnik jih doda s šifro predmeta iz aktualnega Wise kataloga. Vsak predmet ima lastno izbiro vrst izvedbe in skupin, ki ostane shranjena v brskalniku.
 
 ## Zagon na macOS
 
@@ -32,7 +32,7 @@ Uradni Wise REST API v2 zahteva API račun. Aplikacija ga ne uporablja; javni JS
 - `server/normalize.js`: normalizacija vrst ter ključi skupin
 - `server/cache.js`: 8-minutni predpomnilnik tednov, 24-urni katalog/podrobnosti in združevanje sočasnih zahtev
 - `public/filter.js`: čista filtrirna funkcija
-- `public/storage.js`: verzionirane nastavitve `localStorage` (`moj-feri-urnik:v1`, podatkovna shema v2 z migracijo)
+- `public/storage.js`: verzionirane nastavitve `localStorage` z avtomatsko lokalno varnostno kopijo in obnovo poškodovanega glavnega zapisa
 - `public/cache-db.js`: IndexedDB predpomnilnik nefiltriranih tednov
 - `public/api.js`: enotna meja med UI in backend API-jem
 - `public/app.js`: modali, upravljanje predmetov in časovni prikaz s samodejnim razporejanjem prekrivanj

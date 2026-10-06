@@ -12,7 +12,7 @@ function ljubljanaParts() {
 export function registerTarget(ids, dates) { targets.set([...ids].sort().join(','), { ids, dates, at:Date.now() }); }
 export function schedulerStatus() { return { lastRunAt,lastSuccessAt,lastError,running:Boolean(running),schedule:['08:00','16:00'],timezone:'Europe/Ljubljana' }; }
 export function startScheduler(syncTarget, defaults) {
-  registerTarget(defaults.ids, defaults.dates);
+  if (defaults.ids.length) registerTarget(defaults.ids, defaults.dates);
   const check=()=>{ const now=ljubljanaParts(); const slot=now.hour>=16?'16':now.hour>=8?'08':null; const key=slot?`${now.date}:${slot}`:null; if(key&&key!==lastSlot){ lastSlot=key; runAll(syncTarget); } };
   check(); const timer=setInterval(check,60_000); timer.unref?.();
 }
