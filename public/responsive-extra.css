@@ -227,9 +227,9 @@
   }
 
   .days-grid {
-    /* Fit three whole days, including the two gaps, in the day viewport. */
-    grid-template-columns: repeat(5, minmax(0, calc((100% - 8px) / 3)));
-    width: 100%;
+    /* Explicit day widths prevent the five columns from shrinking to fit. */
+    grid-template-columns: repeat(5, var(--mobile-day-width, 100px));
+    width: max-content;
     min-width: 0;
   }
 
