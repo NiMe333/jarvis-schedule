@@ -2,12 +2,13 @@ import { minutes } from './date-utils.js';
 
 export function layoutDay(events) {
   const result=[];
-  for(let i=0;i<events.length;){
+  const ordered=events.slice().sort((a,b)=>a.start.localeCompare(b.start)||a.end.localeCompare(b.end));
+  for(let i=0;i<ordered.length;){
     const cluster=[];
-    let end=minutes(events[i].end),j=i;
-    while(j<events.length&&(j===i||minutes(events[j].start)<end)){
-      cluster.push(events[j]);
-      end=Math.max(end,minutes(events[j].end));
+    let end=minutes(ordered[i].end),j=i;
+    while(j<ordered.length&&(j===i||minutes(ordered[j].start)<end)){
+      cluster.push(ordered[j]);
+      end=Math.max(end,minutes(ordered[j].end));
       j++;
     }
     const ends=[];
@@ -17,7 +18,8 @@ export function layoutDay(events) {
       ends[column]=minutes(event.end);
       return{event,column};
     });
-    placed.forEach(value=>result.push({...value,columns:ends.length}));
+    const columnCount=ends.length;
+    placed.forEach(value=>result.push({...value,columns:columnCount}));
     i=j;
   }
   return result;

@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import { WISE_ORIGIN, WISE_BASE } from './config.js';
-import { clean, splitTitle, groupKey, isRemote } from './normalize.js';
+import { clean, splitTitle, groupKey, isRemote, pickLecturers } from './normalize.js';
 
 const layoutError = detail => new Error(`Wise podatkov ni mogoče razbrati (${detail}). Struktura strani se je verjetno spremenila.`);
 
@@ -44,6 +44,10 @@ async function fetchDetail(eventId, courseId, fallback) {
   const $ = cheerio.load(html);
   const facts = {};
   $('.evfacts dt').each((_, dt) => { facts[clean($(dt).text())] = clean($(dt).next('dd').text()); });
+  $('.evfacts tr').each((_, row) => {
+    const cells = $(row).find('th,td').toArray().map(cell => clean($(cell).text())).filter(Boolean);
+    if (cells.length >= 2) facts[cells[0]] = cells.slice(1).join(' · ');
+  });
   const groupElement = $('.evgroup-list');
   const titleLines = String(groupElement.attr('title') || '').split(/\n+/).map(clean).filter(Boolean);
   const rawGroups = titleLines.map(line => {
@@ -58,7 +62,7 @@ async function fetchDetail(eventId, courseId, fallback) {
   return {
     code: facts['Šifra predmeta'] || '',
     room: facts.Prostori || fallback.room,
-    lecturers: facts.Predavatelji || fallback.lecturers,
+    lecturers: pickLecturers(facts, fallback.lecturers),
     rawType: facts['Vrsta izvedbe'] || fallback.rawType,
     groups
   };

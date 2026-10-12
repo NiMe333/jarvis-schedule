@@ -14,3 +14,11 @@ test('prekrivajoči dogodki dobijo ločene stolpce', () => {
   const result=layoutDay(events);
   assert.deepEqual(result.map(item=>[item.event.id,item.column,item.columns]),[['a',0,2],['b',1,2],['c',0,1]]);
 });
+
+test('dogodka z enakim začetkom in koncem sta vedno drug ob drugem', () => {
+  const result=layoutDay([
+    {id:'a',start:'09:00',end:'10:00'},
+    {id:'b',start:'09:00',end:'10:00'}
+  ]);
+  assert.deepEqual(result.map(item=>[item.event.id,item.column,item.columns]),[['a',0,2],['b',1,2]]);
+});
