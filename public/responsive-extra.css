@@ -153,6 +153,19 @@
 
 .lecturer-label { color: #eef3ff !important; font-size: 9px !important; font-weight: 700; }
 
+.online-label {
+  display: block;
+  align-self: flex-start;
+  margin-top: auto;
+  padding-top: 3px;
+  color: #9ed7ff;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
 .remote-badge {
   display: inline-flex;
   flex: none;
