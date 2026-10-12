@@ -13,6 +13,107 @@ npm run dev
 
 Odpri `http://localhost:4173`. Razvojni zagon uporablja Vite hot reload za frontend; po spremembi backenda ponovno zaženi ukaz. Produkcijski lokalni zagon je `npm start`, produkcijski frontend pa lahko zgradiš z `npm run build`. Vrata lahko spremeniš z `PORT=8080 npm start`, trajanje predpomnilnika pa z `CACHE_MS=600000 npm start`. Testi: `npm test`.
 
+## Linux in Fedora
+
+Aplikacija je podprta na Linuxu. Fedora, Debian/Ubuntu in drugi sistemi so podprti, če imajo Node.js 22.13 ali novejši. Strežnik potrebuje tudi izhodni HTTPS dostop do `www.wise-tt.com`; uporabniki do aplikacije dostopajo prek brskalnika.
+
+### Hiter zagon na Fedori
+
+Za razvoj ali testiranje:
+
+```bash
+sudo dnf install -y git nodejs npm
+node --version                 # mora biti v22.13 ali novejši
+npm --version
+git clone <URL-REPOZITORIJA> jarvis-schedule
+cd jarvis-schedule
+npm ci
+npm test
+npm run dev
+```
+
+Odpri `http://127.0.0.1:4173`. Za dostop iz druge naprave zaženi aplikacijo za reverse proxyjem; samega razvojnega strežnika ne izpostavljaj neposredno v internet.
+
+Če Fedora namesti prestaro različico Node.js, uporabi upravljalnik različic (na primer `nvm`) ali uradni vir za Node.js in nato ponovno preveri `node --version`. Vgrajeni SQLite v Node.js je razlog, da je zahtevan Node.js 22.13 ali novejši; dodatnega sistemskega SQLite strežnika ni treba namestiti.
+
+### Produkcija brez Dockerja: systemd + Nginx
+
+Za stalni strežnik uporabi systemd enoto in Nginx iz imenika `deploy/lxc/`. Ime `lxc` je zgodovinsko; postopek deluje tudi na navadnem Fedora strežniku ali VM-ju.
+
+```bash
+sudo dnf install -y git nodejs npm nginx firewalld
+sudo systemctl enable --now firewalld nginx
+
+sudo mkdir -p /opt/jarvis-schedule
+sudo git clone <URL-REPOZITORIJA> /opt/jarvis-schedule
+sudo useradd --system --home-dir /nonexistent --shell /sbin/nologin jarvis-schedule 2>/dev/null || true
+sudo install -d -o jarvis-schedule -g jarvis-schedule -m 0750 \
+  /var/lib/jarvis-schedule /var/backups/jarvis-schedule
+
+cd /opt/jarvis-schedule
+sudo npm ci
+sudo npm run build
+sudo npm prune --omit=dev
+sudo chown -R root:root /opt/jarvis-schedule
+sudo chmod -R a+rX /opt/jarvis-schedule
+
+sudo install -m 0644 deploy/lxc/jarvis-schedule.service /etc/systemd/system/
+sudo install -m 0644 deploy/lxc/jarvis-schedule-backup.service /etc/systemd/system/
+sudo install -m 0644 deploy/lxc/jarvis-schedule-backup.timer /etc/systemd/system/
+sudo sed 's/__SERVER_NAME__/urnik.example.lan/g' \
+  deploy/lxc/nginx.conf.template | sudo tee /etc/nginx/conf.d/jarvis-schedule.conf >/dev/null
+
+sudo systemctl daemon-reload
+sudo nginx -t
+sudo systemctl enable --now jarvis-schedule.service jarvis-schedule-backup.timer
+sudo systemctl reload nginx
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+sudo firewall-cmd --reload
+curl -fsS http://127.0.0.1:4173/api/health
+```
+
+Za lokalno omrežje zamenjaj `urnik.example.lan` z DNS imenom ali IP-naslovom strežnika. Če DNS še ni nastavljen, dodaj ime v lokalni DNS ali v datoteko `/etc/hosts` na odjemalskih računalnikih. Nginx streže statični frontend, zahtevke `/api/` pa posreduje Node.js procesu na `127.0.0.1:4173`.
+
+Preverjanje in logi:
+
+```bash
+systemctl status jarvis-schedule --no-pager
+systemctl status jarvis-schedule-backup.timer --no-pager
+journalctl -u jarvis-schedule -n 100 --no-pager
+curl -fsS http://127.0.0.1:4173/api/health
+```
+
+Na Fedori je običajno vključen SELinux. Pri namestitvi v `/opt` uporabi `restorecon -Rv /opt/jarvis-schedule /var/lib/jarvis-schedule` in preveri `ausearch -m AVC -ts recent`, če Nginx ali systemd javi zavrnitev. Podatkovne mape ne briši: `/var/lib/jarvis-schedule` vsebuje SQLite podatke, `/var/backups/jarvis-schedule` pa varnostne kopije.
+
+### Docker ali Podman
+
+Repozitorij vsebuje `Dockerfile` in `compose.yaml`. Docker image uporablja Node.js 24 Alpine, zato na gostitelju Node.js ni potreben. Za Docker:
+
+```bash
+cp .env.example .env
+# DOMAIN nastavi na pravo DNS ime, na primer urnik.example.si
+docker compose up -d --build
+docker compose ps
+curl -fsS https://urnik.example.si/api/health
+```
+
+Na Fedori lahko uporabiš tudi Podman, če imaš nameščen združljiv Compose ponudnik; ukazi so praviloma `podman compose ...`. Pri SELinux ohrani imenovane volume-e iz `compose.yaml` oziroma pri lastnih bind mountih uporabi ustrezno oznako `:Z`. Podatki aplikacije so v volume-u `schedule-data`, certifikati Caddyja pa v `caddy-data` in `caddy-config`. Za javni HTTPS mora DNS kazati na strežnik in morata biti odprta vrata 80 ter 443.
+
+Pri reverse proxyju s HTTPS mora biti piškotek nastavljen varno (`COOKIE_SECURE=true`). Pri samo lokalnem HTTP dostopu ostane `COOKIE_SECURE=false`, kot v priloženi systemd enoti. Ne uporabljaj obeh načinov (native Nginx in Compose Caddy) hkrati na istih vratih 80/443.
+
+### Posodobitve na Linuxu
+
+Native namestitev posodobi tako:
+
+```bash
+cd /opt/jarvis-schedule
+sudo git pull --ff-only
+sudo bash deploy/lxc/update.sh /opt/jarvis-schedule
+```
+
+Skripta ponovno namesti odvisnosti, zgradi frontend, odstrani razvojne odvisnosti in ponovno zažene systemd storitev. Ne briše `/var/lib/jarvis-schedule` ali `/var/backups/jarvis-schedule`. Pri Compose namestitvi uporabi `docker compose up -d --build` oziroma ustrezni `podman compose` ukaz.
+
 ## Dejanski podatkovni vir
 
 Adapter bere javni HTML, ne uradnega Wise REST API-ja in ne uporablja iframe-a.
